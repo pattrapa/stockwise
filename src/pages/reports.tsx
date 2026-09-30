@@ -1,0 +1,20 @@
+import { useState } from "react";
+
+import Button from "../components/button";
+import Card from "../components/card";
+import Icon, { type IconName } from "../components/icon";
+import Input from "../components/input";
+import PageHeader from "../components/page-header";
+import Select from "../components/select";
+import { products } from "../data/mock-data";
+
+export default function Reports() {
+  const [tab, setTab] = useState(1);
+  const tabs = [["Inventory Report","รายงาน","box"],["Sales Report","ยอดขาย","cart"],["Profit Report","กำไร","report"],["Stock Movement Report","เคลื่อนไหวสต็อก","history"]];
+  const chart = [55,72,48,82,66,90,75,94,61,84,72,96];
+  return <><PageHeader title="รายงาน" subtitle="วิเคราะห์ข้อมูลและส่งออกรายงานสำหรับธุรกิจ"><Button kind="outline" icon="download">Export CSV</Button><Button icon="download">Export Excel</Button></PageHeader>
+    <div className="grid grid-cols-4 gap-3">{tabs.map((t,i)=><button onClick={()=>setTab(i)} key={t[0]} className={`flex items-center gap-3 rounded-xl border p-4 text-left ${tab===i?"border-[#2457A6] bg-[#EAF2FF] text-[#2457A6]":"border-[#E5E7EB] bg-white text-[#4B5563]"}`}><span className={`grid h-10 w-10 place-items-center rounded-lg ${tab===i?"bg-white":"bg-[#F4F6F8]"}`}><Icon name={t[2] as IconName}/></span><span><b className="block text-[14px]">{t[0]}</b><small>{t[1]}</small></span></button>)}</div>
+    <Card className="mt-5"><div className="flex items-end gap-4 border-b border-[#E5E7EB] p-5"><Input label="ช่วงวันที่" icon="calendar" value="1/05/2568 - 31/05/2568"/><Select label="หมวดหมู่" className="w-56"><option>ทุกหมวดหมู่</option><option>เครื่องดื่ม</option></Select><Button kind="secondary">แสดงรายงาน</Button></div><div className="grid grid-cols-3 gap-4 p-5"><div className="rounded-xl bg-[#FAF7F0] p-4"><p className="text-[13px] text-[#6B7280]">ยอดขายรวม</p><p className="mt-2 text-[24px] font-semibold text-[#2457A6]">฿486,250</p></div><div className="rounded-xl bg-[#FAF7F0] p-4"><p className="text-[13px] text-[#6B7280]">ต้นทุนรวม</p><p className="mt-2 text-[24px] font-semibold">฿357,760</p></div><div className="rounded-xl bg-green-50 p-4"><p className="text-[13px] text-[#50705B]">กำไรสุทธิ</p><p className="mt-2 text-[24px] font-semibold text-[#3A9D5D]">฿128,490</p></div></div>
+    <div className="grid grid-cols-[1.5fr_1fr] gap-6 px-5 pb-5"><div><h3 className="font-semibold">แนวโน้มยอดขายเดือนพฤษภาคม</h3><div className="mt-5 flex h-52 items-end gap-3 border-b border-[#E5E7EB]">{chart.map((h,i)=><div key={i} className="flex h-full flex-1 items-end"><div style={{height:`${h}%`}} className="w-full rounded-t bg-[#7DA6E1]"/></div>)}</div></div><div><h3 className="font-semibold">ยอดขายตามหมวดหมู่</h3><div className="mt-5 space-y-5">{[["เครื่องดื่ม","38%","bg-[#2457A6]"],["ขนมขบเคี้ยว","27%","bg-[#5E8FD1]"],["ของใช้ในบ้าน","21%","bg-[#E99A2C]"],["ของใช้ส่วนตัว","14%","bg-[#9CB9DF]"]].map(x=><div key={x[0]}><div className="mb-1.5 flex justify-between text-[13px]"><span>{x[0]}</span><b>{x[1]}</b></div><div className="h-2 rounded-full bg-gray-100"><div className={`h-full rounded-full ${x[2]}`} style={{width:x[1]}}/></div></div>)}</div></div></div>
+    <div className="border-t border-[#E5E7EB]"><div className="flex justify-between px-5 py-4"><h3 className="font-semibold">สินค้าขายดี</h3><span className="text-[13px] text-[#6B7280]">เรียงตามยอดขายสูงสุด</span></div><table className="w-full text-left text-[13px]"><thead className="bg-[#FAF7F0] text-[#596273]"><tr><th className="px-5 py-3">อันดับ</th><th>สินค้า</th><th>จำนวนขาย</th><th>ยอดขาย</th><th>ต้นทุน</th><th>กำไร</th></tr></thead><tbody>{products.slice(0,4).map((p,i)=><tr className="border-t border-[#ECEEF1]" key={p.sku}><td className="px-5 py-3.5 font-semibold text-[#2457A6]">#{i+1}</td><td><b>{p.name}</b><small className="ml-2 text-[#9CA3AF]">{p.sku}</small></td><td>{342-i*51} ชิ้น</td><td className="font-medium">฿{(p.price*(342-i*51)).toLocaleString()}</td><td>฿{(p.cost*(342-i*51)).toLocaleString()}</td><td className="font-medium text-[#3A9D5D]">฿{((p.price-p.cost)*(342-i*51)).toLocaleString()}</td></tr>)}</tbody></table></div></Card></>;
+}

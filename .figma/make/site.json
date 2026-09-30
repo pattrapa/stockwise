@@ -1,0 +1,10 @@
+{
+  "description": "Streamline inventory and sales management for businesses with a user-friendly interface designed for employees aged 40+, enhancing efficiency and clarity.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

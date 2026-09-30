@@ -1,0 +1,14 @@
+import Button from "../components/button";
+import Card from "../components/card";
+import PageHeader from "../components/page-header";
+import { Page } from "../types";
+import Logo from "../components/logo";
+
+export default function Receipt({ setPage }: { setPage: (p: Page) => void }) {
+  return <><PageHeader title="รายละเอียดรายการขาย" subtitle="เลขที่รายการ INV-250524-018"><Button kind="outline" onClick={()=>setPage("history")}>กลับไปประวัติการขาย</Button><Button icon="print" onClick={()=>window.print()}>พิมพ์ใบเสร็จ</Button></PageHeader>
+    <div className="mx-auto w-175"><Card className="receipt p-10"><div className="border-b-2 border-[#173B70] pb-6 text-center"><div className="mx-auto flex w-fit justify-center"><Logo/></div><h2 className="mt-5 text-[20px] font-semibold">บริษัท สต็อกไวส์ จำกัด</h2><p className="mt-1 text-[13px] leading-6 text-[#6B7280]">99/9 ถนนสุขุมวิท กรุงเทพมหานคร 10110<br/>โทร. 02-123-4567 · เลขประจำตัวผู้เสียภาษี 0105558123456</p></div>
+    <div className="flex justify-between border-b border-[#E5E7EB] py-5 text-[14px]"><div><p className="text-[#6B7280]">เลขที่ใบเสร็จ</p><b>INV-250524-018</b></div><div className="text-right"><p className="text-[#6B7280]">วันที่และเวลา</p><b>24 พฤษภาคม 2568, 10:42 น.</b></div></div>
+    <table className="mt-5 w-full text-left text-[14px]"><thead className="bg-[#FAF7F0] text-[12px]"><tr><th className="px-3 py-3">สินค้า</th><th className="text-center">จำนวน</th><th className="text-right">ราคา/หน่วย</th><th className="pr-3 text-right">รวม</th></tr></thead><tbody>{[["น้ำดื่มคริสตัล 600 มล.","2","฿10.00","฿20.00"],["กาแฟสำเร็จรูป 3 in 1","3","฿115.00","฿345.00"],["กระดาษทิชชู่ 6 ม้วน","5","฿69.00","฿345.00"],["สบู่เหลวล้างมือ 250 มล.","4","฿55.00","฿220.00"],["มันฝรั่งทอด รสดั้งเดิม","16","฿20.00","฿320.00"]].map(x=><tr key={x[0]} className="border-b border-[#ECEEF1]"><td className="px-3 py-3.5">{x[0]}</td><td className="text-center">{x[1]}</td><td className="text-right">{x[2]}</td><td className="pr-3 text-right font-medium">{x[3]}</td></tr>)}</tbody></table>
+    <div className="ml-auto mt-5 w-72 space-y-2 text-[14px]"><div className="flex justify-between text-[#6B7280]"><span>ยอดรวมย่อย</span><span>฿1,250.00</span></div><div className="flex justify-between text-[#6B7280]"><span>ส่วนลด</span><span>฿0.00</span></div><div className="flex justify-between border-t-2 border-[#173B70] pt-3 text-[20px] font-semibold"><span>ยอดสุทธิ</span><span className="text-[#2457A6]">฿1,250.00</span></div><div className="flex justify-between pt-1"><span className="text-[#6B7280]">วิธีชำระเงิน</span><b>QR Payment</b></div></div>
+    <div className="mt-8 rounded-lg bg-[#FAF7F0] p-4 text-center text-[13px] text-[#6B7280]"><p className="font-medium text-[#374151]">ขอบคุณที่ใช้บริการ</p><p className="mt-1">พนักงานขาย: สมชาย ใจดี</p></div></Card></div></>;
+}
