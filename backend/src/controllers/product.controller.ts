@@ -33,7 +33,7 @@ export const getProducts = async (_req: Request, res: Response) => {
 };
 
 // เพิ่มสินค้าใหม่
-export const createProduct = async (req: Request, res: Response) => {
+export const createProduct = async (_req: Request, res: Response) => {
   try {
     const {
       sku,
@@ -44,7 +44,7 @@ export const createProduct = async (req: Request, res: Response) => {
       stock,
       minimum_stock,
       image_url,
-    } = req.body;
+    } = _req.body;
 
     if (!sku || !name || !category_id) {
       return res.status(400).json({
@@ -77,7 +77,7 @@ export const createProduct = async (req: Request, res: Response) => {
         stock ?? 0,
         minimum_stock ?? 5,
         image_url ?? null,
-      ]
+      ],
     );
 
     res.status(201).json(result.rows[0]);
@@ -102,6 +102,49 @@ export const createProduct = async (req: Request, res: Response) => {
   }
 };
 
+export const getProductById = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const result = await pool.query(
+      `
+      SELECT
+        p.id,
+        p.sku,
+        p.name,
+        p.category_id,
+        c.name AS category,
+        p.cost,
+        p.price,
+        p.stock,
+        p.minimum_stock,
+        p.image_url,
+        p.created_at,
+        p.updated_at
+      FROM products p
+      LEFT JOIN categories c
+        ON p.category_id = c.id
+      WHERE p.id = $1
+      `,
+      [id]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({
+        message: "ไม่พบสินค้า",
+      });
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error("Get product by id error:", error);
+
+    res.status(500).json({
+      message: "Failed to get product",
+    });
+  }
+};
+
 // Delete a product by ID
 export const deleteProduct = async (req: Request, res: Response) => {
   try {
@@ -113,7 +156,7 @@ export const deleteProduct = async (req: Request, res: Response) => {
       WHERE id = $1
       RETURNING *
       `,
-      [id]
+      [id],
     );
 
     if (result.rowCount === 0) {
@@ -177,7 +220,7 @@ export const updateProduct = async (req: Request, res: Response) => {
         minimum_stock,
         image_url ?? null,
         id,
-      ]
+      ],
     );
 
     if (result.rowCount === 0) {

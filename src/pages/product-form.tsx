@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import PageHeader from "../components/page-header";
 import Card from "../components/card";
@@ -7,6 +7,11 @@ import Select from "../components/select";
 import Button from "../components/button";
 import Icon from "../components/icon";
 import type { Page } from "../types";
+
+type Category = {
+  id: number;
+  name: string;
+};
 
 export default function ProductForm({
   setPage,
@@ -27,6 +32,7 @@ export default function ProductForm({
     minimum_stock: "10",
   });
 
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -43,6 +49,75 @@ export default function ProductForm({
     }));
   };
 
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:3000/api/categories"
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error("ไม่สามารถโหลดหมวดหมู่ได้");
+        }
+
+        setCategories(data);
+      } catch (error) {
+        console.error("Fetch categories error:", error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    if (editingProductId === null) return;
+
+    const fetchProduct = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const response = await fetch(
+          `http://localhost:3000/api/products/${editingProductId}`
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            data.message || "ไม่สามารถโหลดข้อมูลสินค้าได้"
+          );
+        }
+
+        setForm({
+          sku: data.sku ?? "",
+          barcode: data.barcode ?? "",
+          name: data.name ?? "",
+          category_id: String(data.category_id ?? ""),
+          description: data.description ?? "",
+          cost: String(data.cost ?? ""),
+          price: String(data.price ?? ""),
+          stock: String(data.stock ?? ""),
+          minimum_stock: String(data.minimum_stock ?? "10"),
+        });
+      } catch (err) {
+        console.error(err);
+
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("เกิดข้อผิดพลาด");
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, [editingProductId]);
+
   const handleSubmit = async () => {
     try {
       setLoading(true);
@@ -53,8 +128,18 @@ export default function ProductForm({
         return;
       }
 
-      const response = await fetch("http://localhost:3000/api/products", {
-        method: "POST",
+      const url =
+        editingProductId === null
+          ? "http://localhost:3000/api/products"
+          : `http://localhost:3000/api/products/${editingProductId}`;
+
+      const method =
+        editingProductId === null
+          ? "POST"
+          : "PUT";
+
+      const response = await fetch(url, {
+        method,
         headers: {
           "Content-Type": "application/json",
         },
@@ -73,7 +158,12 @@ export default function ProductForm({
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "ไม่สามารถเพิ่มสินค้าได้");
+        throw new Error(
+          data.message ||
+            (editingProductId === null
+              ? "ไม่สามารถเพิ่มสินค้าได้"
+              : "ไม่สามารถแก้ไขสินค้าได้")
+        );
       }
 
       setPage("inventory");
@@ -93,8 +183,16 @@ export default function ProductForm({
   return (
     <>
       <PageHeader
-        title="เพิ่มสินค้าใหม่"
-        subtitle="กรอกข้อมูลสินค้าให้ครบถ้วนเพื่อเพิ่มลงในคลัง"
+        title={
+          editingProductId === null
+            ? "เพิ่มสินค้าใหม่"
+            : "แก้ไขสินค้า"
+        }
+        subtitle={
+          editingProductId === null
+            ? "กรอกข้อมูลสินค้าให้ครบถ้วนเพื่อเพิ่มลงในคลัง"
+            : "แก้ไขข้อมูลสินค้าแล้วบันทึกการเปลี่ยนแปลง"
+        }
       />
 
       <div className="grid grid-cols-[280px_1fr] gap-5">
@@ -105,7 +203,10 @@ export default function ProductForm({
             รองรับ JPG หรือ PNG ไม่เกิน 5 MB
           </p>
 
-          <button className="mt-4 grid aspect-square w-full place-items-center rounded-xl border-2 border-dashed border-[#C9D3E2] bg-[#FAFCFF] text-[#6B7280] hover:border-[#2457A6]">
+          <button
+            type="button"
+            className="mt-4 grid aspect-square w-full place-items-center rounded-xl border-2 border-dashed border-[#C9D3E2] bg-[#FAFCFF] text-[#6B7280] hover:border-[#2457A6]"
+          >
             <span className="flex flex-col items-center">
               <span className="grid h-12 w-12 place-items-center rounded-full bg-[#EAF2FF] text-[#2457A6]">
                 <Icon name="image" size={23} />
@@ -115,7 +216,9 @@ export default function ProductForm({
                 อัปโหลดรูปสินค้า
               </b>
 
-              <small className="mt-1">หรือลากไฟล์มาวางที่นี่</small>
+              <small className="mt-1">
+                หรือลากไฟล์มาวางที่นี่
+              </small>
             </span>
           </button>
         </Card>
@@ -158,11 +261,18 @@ export default function ProductForm({
               value={form.category_id}
               onChange={handleChange}
             >
-              <option value="">เลือกหมวดหมู่</option>
-              <option value="3">เครื่องดื่ม</option>
-              <option value="4">ขนมขบเคี้ยว</option>
-              <option value="5">ของใช้ในบ้าน</option>
-              <option value="6">ของใช้ส่วนตัว</option>
+              <option value="">
+                เลือกหมวดหมู่
+              </option>
+
+              {categories.map((category) => (
+                <option
+                  key={category.id}
+                  value={category.id}
+                >
+                  {category.name}
+                </option>
+              ))}
             </Select>
 
             <div />
@@ -243,7 +353,11 @@ export default function ProductForm({
               icon="check"
               onClick={handleSubmit}
             >
-              {loading ? "กำลังบันทึก..." : "บันทึกสินค้า"}
+              {loading
+                ? "กำลังบันทึก..."
+                : editingProductId === null
+                  ? "บันทึกสินค้า"
+                  : "บันทึกการแก้ไข"}
             </Button>
           </div>
         </Card>
